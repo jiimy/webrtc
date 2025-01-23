@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import NavBar from "@/component/layout/NavBar";
 import Container from "@/component/layout/Container";
-
-const inter = Inter({ subsets: ["latin"] });
+import SocketProvider from "@/provider/SocketProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,13 +18,15 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={inter.className}>
-          <main className="flex flex-col min-h-screen bg-secondary">
-            <NavBar />
-            <Container>
-              {children}
-            </Container>
-          </main>
+        <body>
+          <SocketProvider>
+            <main className="flex flex-col min-h-screen bg-secondary">
+              <NavBar />
+              <Container>
+                {children}
+              </Container>
+            </main>
+          </SocketProvider>
         </body>
       </html>
     </ClerkProvider>
