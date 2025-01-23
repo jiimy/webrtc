@@ -15,12 +15,13 @@ export const SocketContextProvier = ({ children }: { children: React.ReactNode }
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<SocketUser[] | null>(null);
 
-  console.log('user1', user);
-  console.log('user', onlineUsers, socket, isSocketConnected);
+  // console.log('user1', user);
+  // console.log('user', onlineUsers, socket, isSocketConnected);
 
   // 소켓 초기화
   useEffect(() => {
     const newSocket = io();
+    console.log('새 소켓 연결', newSocket)
     setSocket(newSocket);
 
     return () => {
@@ -31,7 +32,9 @@ export const SocketContextProvier = ({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (socket === null) return;
 
+    console.log('소켓 상태: ', socket.connected)
     if (socket.connected) {
+      console.log('소켓 연결됨');
       onConnect();
     }
     function onConnect() {
@@ -40,12 +43,12 @@ export const SocketContextProvier = ({ children }: { children: React.ReactNode }
     function onDisconnect() {
       setIsSocketConnected(false);
     }
-    socket.on('connet', onConnect)
-    socket.on('disconnet', onDisconnect)
+    socket.on('connect', onConnect)
+    socket.on('disconnect', onDisconnect)
 
     return () => {
       socket.off('connect', onConnect)
-      socket.off('disconnet', onDisconnect)
+      socket.off('disconnect', onDisconnect)
     }
   }, [socket])
 
