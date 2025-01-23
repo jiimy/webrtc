@@ -9,7 +9,7 @@ const NavBar = () => {
   const router = useRouter();
   const { userId } = useAuth();
   return (
-    <div className='sticky top-0 border border-b-primary/10'>
+    <div className='sticky top-0 border'>
       <Container>
         <div className='flex justify-between items-center'>
           <div className='flex items-center gap-1 cursor-pointer' onClick={() => router.push('/')}>
