@@ -1,10 +1,13 @@
-import { SocketUser } from "@/types";
+import { OngoingCall, Participants, SocketUser } from "@/types";
 import { useUser } from "@clerk/nextjs";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { io, Socket } from 'socket.io-client';
 
 interface ISocketContext {
   onlineUsers: SocketUser[] | null
+  ongoingCall: OngoingCall | null
+  handleCall: (user: SocketUser) => void
+
 }
 
 export const SocketContext = createContext<ISocketContext | null>(null)
@@ -14,6 +17,28 @@ export const SocketContextProvier = ({ children }: { children: React.ReactNode }
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<SocketUser[] | null>(null);
+  const [ongoingCall, setOngoingCall] = useState<OngoingCall | null>(null);
+
+  const currentSocketUser = onlineUsers?.find(onlineUser => onlineUser.userId === user?.id)
+
+  const handleCall = useCallback((user: SocketUser) => {
+    if (!currentSocketUser || !socket) return;
+
+    const participants = { caller: currentSocketUser, receiver: user }
+    setOngoingCall({
+      participants,
+      isRinging: false,
+    })
+    socket?.emit('call', participants);
+  }, [socket, currentSocketUser, ongoingCall])
+
+  const onIncomingCall = useCallback((participants: Participants) => {
+
+    setOngoingCall({
+      participants,
+      isRinging: true
+    })
+  }, [socket, user, ongoingCall])
 
   // console.log('user1', user);
   // console.log('user', onlineUsers, socket, isSocketConnected);
@@ -21,7 +46,6 @@ export const SocketContextProvier = ({ children }: { children: React.ReactNode }
   // 소켓 초기화
   useEffect(() => {
     const newSocket = io();
-    console.log('새 소켓 연결', newSocket)
     setSocket(newSocket);
 
     return () => {
@@ -32,9 +56,7 @@ export const SocketContextProvier = ({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (socket === null) return;
 
-    console.log('소켓 상태: ', socket.connected)
     if (socket.connected) {
-      console.log('소켓 연결됨');
       onConnect();
     }
     function onConnect() {
@@ -68,7 +90,18 @@ export const SocketContextProvier = ({ children }: { children: React.ReactNode }
     }
   }, [socket, isSocketConnected, user])
 
-  return <SocketContext.Provider value={{ onlineUsers }}>
+  // caller
+  useEffect(() => {
+    if (!socket || !isSocketConnected) return;
+
+    socket.on('incomingCall', onIncomingCall)
+
+    return () => {
+      socket.off('incomingCall', onIncomingCall)
+    }
+  }, [socket, isSocketConnected, user, onIncomingCall])
+
+  return <SocketContext.Provider value={{ onlineUsers, handleCall, ongoingCall }}>
     {children}
   </SocketContext.Provider>
 }

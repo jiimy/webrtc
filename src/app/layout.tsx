@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import NavBar from "@/component/layout/NavBar";
 import Container from "@/component/layout/Container";
 import SocketProvider from "@/provider/SocketProvider";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,7 +19,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body>
+        <body className={cn('', 'relative')}>
           <SocketProvider>
             <main className="flex flex-col min-h-screen bg-secondary">
               <NavBar />
