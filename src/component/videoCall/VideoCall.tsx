@@ -2,9 +2,10 @@
 import { useSocket } from '@/context/SocketContext';
 import React, { useCallback, useEffect, useState } from 'react';
 import VideoCotainer from '../videoContainer/VideoCotainer';
+import { MdMic, MdMicOff, MdVideocam, MdVideocamOff } from 'react-icons/md';
 
 const VideoCall = () => {
-  const { localStream } = useSocket();
+  const { localStream, peer, isCallEnded, ongoingCall, handleHangup } = useSocket();
   const [isMicOn, setIsMicOn] = useState(false);
   const [isVidOn, setIsVidOn] = useState(false);
 
@@ -33,13 +34,34 @@ const VideoCall = () => {
     }
   }, [localStream]);
 
+  const isOnCall = localStream && peer && ongoingCall ? true : false;
+
+  if(!isCallEnded) {
+    return <div className="mt-5 text-rose-500 text-center">Call Ended</div>
+  }
+
+  if(!localStream && !peer) return;
+
   return (
     <div>
-      <div>
-      {localStream && <VideoCotainer stream={localStream} isLocalStream={true} isOnCall={false} />}
+      <div className='mt-4 relative'>
+        {localStream && <VideoCotainer stream={localStream} isLocalStream={true} isOnCall={isOnCall} />}
+        {peer && peer.stream && <VideoCotainer stream={peer.stream} isLocalStream={false} isOnCall={isOnCall} />}
       </div>
-      <div className='mt-8 flex items-center'>
-        <button></button>
+      <div className='mt-8 flex items-center justify-center'>
+        <button onClick={toggleMic}>
+          {isMicOn && <MdMicOff size={28} />}
+          {!isMicOn && <MdMic size={28} />}
+        </button>
+        <button className="px-4 py-2 bg-rows-500 text-white rounded mx-4" onClick={() => handleHangup({
+          ongoingCall: ongoingCall ? ongoingCall : undefined, isEmitHangup: true
+        })}>
+          End Call
+        </button>
+        <button onClick={toggleCamera}>
+          {isVidOn && <MdVideocamOff size={28} />}
+          {!isVidOn && <MdVideocam size={28} />}
+        </button>
       </div>
     </div>
   );
