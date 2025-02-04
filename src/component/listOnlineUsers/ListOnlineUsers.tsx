@@ -14,6 +14,7 @@ const ListOnlineUsers = () => {
 
         return (
           <div key={onlineUser.userId} onClick={() => handleCall(onlineUser)}>
+            전화걸기
             <Avatar src={onlineUser.profile.imageUrl} />
             <div>
               {onlineUser.profile.fullName?.split(' ')[0]}

@@ -21,6 +21,7 @@ const CallNotification = () => {
           <button className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white"
             onClick={() => handleJoinCall(ongoingCall)}
           >
+            여기 
             <MdCall size={24} />
           </button>
           <button className="w-10 h-10 bg-rose-500 rounded-full flex items-center justify-center text-white"
